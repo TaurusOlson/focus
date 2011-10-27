@@ -1,0 +1,67 @@
+#!/bin/bash
+
+usage () {
+    cat << EOF
+$(basename $0) - a tool to remain focused on stuffs
+usage: focus ACTION STUFF [@TAG|LINENB]
+
+ACTION:
+on  - Store the STUFF in a predefined file
+off - Delete the STUFF when it's finished
+
+EOF
+}
+
+remember () {
+    cat -b $FILE
+}
+
+today () {
+   date "+%d/%m/%y" 
+}
+
+
+FILE=$DROP/focusing
+
+# description: 
+# usage: focus
+if [[ $# -lt 1 ]]; then
+    usage
+fi
+
+# description: 
+# usage: focus ACTION
+if [[ $# -eq 1 ]]; then
+
+    # OPTION: on
+    if [[ $1 == on ]]; then
+        remember
+    fi
+fi
+
+# description: 
+# usage: focus OPTION STUFF
+if [[ $# -ge 2 ]]; then
+
+    # OPTION: on
+    if [[ $1 == on ]]; then
+
+        # description: Display the entries with the given TAG
+        # usage: focus on @TAG
+        if  [[ $# -eq 2  &&  $(echo $2 | grep '@') ]] ; then
+            cat -b $FILE | grep $2
+        else
+            shift
+            ENTRY="$@"
+            echo "[$(today)] $ENTRY" >> $FILE
+        fi
+    fi
+
+    # OPTION: off
+    # usage: focus off LINENB
+    if [[ $1 == off ]]; then
+        LINENB=$2
+        echo Finished: $(cat -b $FILE | egrep "[[:space:]]${LINENB}".) && 
+        sed -i '' "${LINENB}d" $FILE 
+    fi
+fi
