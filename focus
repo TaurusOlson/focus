@@ -3,11 +3,13 @@
 usage () {
     cat << EOF
 $(basename $0) - a tool to remain focused on stuffs
-usage: focus ACTION STUFF [@TAG|LINENB]
+usage: focus ACTION STUFF [@TAG]
 
 ACTION:
 on  - Store the STUFF in a predefined file
 off - Delete the STUFF when it's finished
+
+
 
 EOF
 }
@@ -22,6 +24,9 @@ today () {
 
 
 FILE=$DROP/focusing
+
+BLUE="\033[34m"
+RED="\033[31m"
 
 # description: 
 # usage: focus
@@ -49,11 +54,12 @@ if [[ $# -ge 2 ]]; then
         # description: Display the entries with the given TAG
         # usage: focus on @TAG
         if  [[ $# -eq 2  &&  $(echo $2 | grep '@') ]] ; then
-            cat -b $FILE | grep $2
+            cat -b $FILE | grep --color $2
         else
             shift
             ENTRY="$@"
             echo "[$(today)] $ENTRY" >> $FILE
+            echo -e ${RED}"Started: [$(today)] $ENTRY"
         fi
     fi
 
@@ -61,7 +67,7 @@ if [[ $# -ge 2 ]]; then
     # usage: focus off LINENB
     if [[ $1 == off ]]; then
         LINENB=$2
-        echo Finished: $(cat -b $FILE | egrep "[[:space:]]${LINENB}".) && 
+        echo -e ${BLUE}Finished: $(cat -b $FILE | egrep "[[:space:]]${LINENB}".) && 
         sed -i '' "${LINENB}d" $FILE 
     fi
 fi
